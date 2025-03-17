@@ -1,0 +1,153 @@
+.productivity-charts {
+  padding: var(--space-xl);
+}
+
+.chart-controls {
+  margin-bottom: var(--space-xl);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xl);
+  position: relative;
+  background-color: white;
+  padding: var(--space-lg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.control-group label {
+  font-weight: 500;
+  color: var(--gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.productivity-charts .k-animation-container,
+.productivity-charts .k-calendar-container,
+.productivity-charts .k-popup {
+  z-index: 9999 !important;
+}
+
+.chart-container {
+  background-color: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.chart-title {
+  text-align: center;
+  color: var(--gray-800);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: var(--space-lg);
+}
+
+.insights-content {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0 var(--space-md);
+}
+
+.insights-content p {
+  margin-bottom: var(--space-md);
+  line-height: 1.6;
+  color: var(--gray-800);
+}
+
+.insights-content p:first-of-type {
+  font-weight: 500;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-lg) 0 0;
+  border-top: 1px solid var(--gray-200);
+  margin-top: var(--space-lg);
+}
+
+.no-data-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 350px;
+  color: var(--gray-600);
+  font-size: var(--font-size-md);
+  font-style: italic;
+  text-align: center;
+  flex-grow: 1;
+  background-color: var(--gray-100);
+  border-radius: var(--border-radius-md);
+  border: 1px dashed var(--gray-300);
+}
+
+.productivity-charts .recharts-tooltip-wrapper {
+  z-index: 10;
+}
+
+.productivity-charts .recharts-default-tooltip {
+  background-color: white !important;
+  border: none !important;
+  border-radius: var(--border-radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  padding: var(--space-md) !important;
+}
+
+.productivity-charts .recharts-tooltip-label {
+  color: var(--gray-800) !important;
+  font-weight: 600 !important;
+  margin-bottom: var(--space-sm) !important;
+}
+
+.productivity-charts .recharts-tooltip-item {
+  color: var(--gray-700) !important;
+  padding: var(--space-xs) 0 !important;
+}
+
+@media (max-width: 992px) {
+  .chart-controls {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  
+  .control-group {
+    width: 100%;
+  }
+  
+  .control-group .k-dropdown,
+  .control-group .k-datepicker {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .productivity-charts {
+    padding: var(--space-md);
+  }
+  
+  .chart-container {
+    padding: var(--space-md);
+    min-height: 350px;
+  }
+  
+  .chart-controls {
+    padding: var(--space-md);
+  }
+} 

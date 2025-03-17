@@ -1,0 +1,24 @@
+.date-range-picker-custom {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.date-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.date-range-picker-custom .k-animation-container {
+  z-index: 9999 !important;
+}
+
+.date-range-picker-custom .k-calendar-container {
+  z-index: 9999 !important;
+}
+
+.date-range-picker-custom .k-popup {
+  z-index: 9999 !important;
+} 

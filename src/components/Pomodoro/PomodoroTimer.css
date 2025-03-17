@@ -1,0 +1,104 @@
+.pomodoro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-sm);
+  height: 100%;
+}
+
+.pomodoro-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.timer-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-color-primary);
+  margin: var(--spacing-md) 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  justify-content: center;
+}
+
+.timer-controls button {
+  min-width: 90px;
+}
+
+.timer-mode {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.timer-mode button {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-sm);
+}
+
+.timer-progress {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.timer-progress .k-progressbar {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.timer-task-selector {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.timer-task-selector label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+}
+
+.timer-stats {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.timer-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timer-stat-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.timer-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-color-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+} 

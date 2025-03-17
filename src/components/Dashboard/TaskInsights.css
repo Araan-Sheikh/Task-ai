@@ -1,0 +1,117 @@
+.insights-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.insights-section h4 {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.insights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  max-height: 250px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-400) transparent;
+}
+
+.insights-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.insights-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.insights-list::-webkit-scrollbar-thumb {
+  background-color: var(--gray-400);
+  border-radius: 2px;
+}
+
+.insight-item {
+  background-color: var(--background-color);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: center;
+}
+
+.insight-item:hover {
+  background-color: var(--hover-color);
+  transform: translateX(2px);
+}
+
+.insight-item.completed {
+  border-left-color: var(--success-color);
+  opacity: 0.8;
+}
+
+.insight-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.insight-item-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.insight-item-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-color-tertiary);
+}
+
+.days-remaining {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background-color: var(--info-color-light);
+  color: var(--info-color-dark);
+}
+
+.days-remaining.urgent {
+  background-color: var(--danger-color-light);
+  color: var(--danger-color-dark);
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background-color: var(--background-color);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-color-tertiary);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.insights-footer {
+  margin-top: auto;
+  padding-top: var(--spacing-sm);
+  display: flex;
+  justify-content: center;
+} 
+ 

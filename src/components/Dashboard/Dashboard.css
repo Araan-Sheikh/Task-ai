@@ -1,0 +1,221 @@
+:root {
+  --card-transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+  --card-hover-translate: translateY(-5px);
+  --card-hover-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  --section-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --border-subtle: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--spacing-md);
+  gap: var(--spacing-md);
+  background-color: var(--background-color);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.stat-item {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-item h3 {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.info-icon {
+  cursor: help;
+  color: var(--text-color-tertiary);
+  font-size: 0.8rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.stat-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.stat-percentage {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+  min-width: 60px;
+  text-align: right;
+}
+
+.dashboard-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboard-main-content .k-tabstrip {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.dashboard-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.dashboard-tools-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-insights {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.task-insights h3 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  font-size: 1.2rem;
+  color: var(--text-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pomodoro-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pomodoro-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.pomodoro-card-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-color-primary);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-tools {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .dashboard-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-tools-column:nth-child(1) {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.dashboard-tools-column:nth-child(2) {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+} 

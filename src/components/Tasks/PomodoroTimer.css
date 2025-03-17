@@ -1,0 +1,366 @@
+.pomodoro-container {
+  width: 100%;
+}
+
+.pomodoro-timer {
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(135deg, #4361ee, #7209b7);
+  box-shadow: 0 4px 15px rgba(66, 99, 235, 0.2);
+  transition: all 0.3s ease;
+}
+
+.pomodoro-timer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.7;
+}
+
+.timer-mode-selector {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.timer-mode-selector button {
+  flex: 1;
+  margin: 0 2px;
+  border-radius: 6px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  padding: var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.timer-mode-selector button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.2s ease;
+  z-index: -1;
+}
+
+.timer-mode-selector button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.timer-mode-selector button:hover::before {
+  transform: translateY(0);
+}
+
+.timer-mode-selector button[aria-pressed="true"] {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.timer-display {
+  text-align: center;
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.timer-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent);
+  background-size: 8px 8px;
+  opacity: 0.3;
+}
+
+.timer-display h2 {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0;
+  margin-bottom: var(--space-md);
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.timer-task-selector {
+  margin: var(--space-md) 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: var(--space-sm);
+}
+
+.timer-task-selector label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.timer-controls button {
+  flex: 1;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.timer-controls button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.timer-controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timer-controls button:hover::after {
+  opacity: 1;
+}
+
+.timer-controls button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pomodoro-stats {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+}
+
+.pomodoro-stats .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: var(--space-xs) var(--space-sm);
+  min-width: 80px;
+}
+
+.pomodoro-stats .stat label {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+  margin-bottom: var(--space-xs);
+}
+
+.pomodoro-stats .stat span {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.pomodoro-settings {
+  background-color: white;
+  border-radius: 12px;
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  color: var(--gray-800);
+  position: relative;
+  z-index: 10;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pomodoro-settings h3 {
+  margin-top: 0;
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-lg);
+  color: var(--gray-900);
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setting-group {
+  margin-bottom: var(--space-md);
+  background-color: var(--light-color);
+  padding: var(--space-sm);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.setting-group:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: white;
+}
+
+.setting-group.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.settings-actions button {
+  padding: var(--space-sm) var(--space-md);
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.settings-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* In card layout */
+.pomodoro-card .pomodoro-container {
+  padding: 0;
+}
+
+.pomodoro-card .pomodoro-timer {
+  border-radius: 0 0 12px 12px;
+}
+
+/* Custom Kendo Controls Styling */
+.pomodoro-timer .k-dropdown {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+.pomodoro-timer .k-dropdown .k-input-inner {
+  color: white !important;
+}
+
+.pomodoro-timer .k-dropdown .k-select {
+  color: white !important;
+}
+
+.pomodoro-timer .k-dropdown:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.pomodoro-timer .k-dropdown:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3) !important;
+}
+
+.pomodoro-timer .k-progress-bar {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .timer-mode-selector button {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs);
+  }
+  
+  .timer-display {
+    padding: var(--space-sm);
+  }
+  
+  .timer-display h2 {
+    font-size: 40px;
+  }
+  
+  .timer-controls button {
+    font-size: 12px;
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
+
+@media (max-width: 576px) {
+  .timer-controls {
+    flex-direction: column;
+  }
+  
+  .pomodoro-stats {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+  }
+  
+  .pomodoro-stats .stat {
+    flex-direction: row;
+    gap: var(--space-sm);
+    justify-content: space-between;
+    min-width: 120px;
+  }
+  
+  .pomodoro-timer {
+    padding: var(--space-sm);
+  }
+} 

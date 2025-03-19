@@ -17,10 +17,79 @@ import {
   Tab,
   NotificationSystem
 } from '../common';
-import { Task } from '../../models/Task';
+import { Task, PriorityLevel, RecurringPattern } from '../../models/Task';
 import { TaskService } from '../../services/TaskService';
 import { AIService } from '../../services/AIService';
 import './Dashboard.css';
+
+// Temporary component declarations until we create the actual files
+const DailySummary: React.FC<{ summary: string }> = ({ summary }) => (
+  <div className="daily-summary-container">
+    <h3>Today's Summary</h3>
+    <div className="summary-content">{summary}</div>
+  </div>
+);
+
+const RecurringTaskModal: React.FC<{
+  task: Task;
+  onSetupRecurring: (pattern: RecurringPattern) => void;
+  onCancel: () => void;
+}> = ({ task, onSetupRecurring, onCancel }) => (
+  <CustomModal
+    title="Set Up Recurring Task"
+    onClose={onCancel}
+    width={500}
+    footer={
+      <div>
+        <Button onClick={() => onSetupRecurring({
+          frequency: 'weekly',
+          interval: 1,
+          daysOfWeek: [new Date().getDay()]
+        })} themeColor="primary">Setup Weekly</Button>
+        <Button onClick={onCancel}>Cancel</Button>
+      </div>
+    }
+  >
+    <div>
+      <p>AI has detected that you might want to make this a recurring task:</p>
+      <p><strong>{task.title}</strong></p>
+      <p>Would you like to set up a recurring schedule?</p>
+    </div>
+  </CustomModal>
+);
+
+const RelatedTasksModal: React.FC<{
+  suggestions: Partial<Task>[];
+  onAddTask: (task: Partial<Task>) => void;
+  onCancel: () => void;
+}> = ({ suggestions, onAddTask, onCancel }) => (
+  <CustomModal
+    title="AI Suggested Related Tasks"
+    onClose={onCancel}
+    width={600}
+    footer={
+      <Button onClick={onCancel}>Close</Button>
+    }
+  >
+    <div>
+      <p>Based on your recent task, AI suggests these related tasks:</p>
+      <div className="related-task-suggestions">
+        {suggestions.map((task, index) => (
+          <div key={index} className="related-task-card">
+            <h4>{task.title}</h4>
+            <p>{task.description}</p>
+            <div className="task-meta">
+              <span>Priority: {task.priority}</span>
+              {task.estimatedTime && <span>Est. time: {task.estimatedTime} mins</span>}
+            </div>
+            <p className="task-reason">{task.aiSuggestions?.reason}</p>
+            <Button onClick={() => onAddTask(task)} themeColor="primary">Add Task</Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  </CustomModal>
+);
 
 const Dashboard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -37,10 +106,22 @@ const Dashboard: React.FC = () => {
   const [showScheduleSuggestion, setShowScheduleSuggestion] = useState(false);
   const [scheduleSuggestion, setScheduleSuggestion] = useState<any>(null);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+  const [dailySummary, setDailySummary] = useState<string | null>(null);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [showRecurringModal, setShowRecurringModal] = useState(false);
+  const [showRelatedTasksModal, setShowRelatedTasksModal] = useState(false);
+  const [relatedTaskSuggestions, setRelatedTaskSuggestions] = useState<Partial<Task>[]>([]);
 
   useEffect(() => {
     loadTasks();
   }, []);
+
+  useEffect(() => {
+    // Generate daily summary when tasks are loaded
+    if (tasks.length > 0) {
+      generateDailySummary();
+    }
+  }, [tasks]);
 
   const loadTasks = () => {
     const loadedTasks = TaskService.getTasks();
@@ -86,12 +167,29 @@ const Dashboard: React.FC = () => {
     setShowTaskForm(true);
   };
 
-  const handleTaskSubmit = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleTaskSubmit = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       if (isCreating) {
         const newTask = TaskService.addTask(taskData);
         setTasks([...tasks, newTask]);
         showNotification('Task created successfully!', 'success');
+        
+        // Check if there are similar tasks to suggest a recurring pattern
+        const similarTasks = findSimilarTasks(newTask);
+        if (similarTasks.length >= 2) {
+          const pattern = await AIService.suggestRecurringPattern([...similarTasks, newTask]);
+          if (pattern) {
+            setSelectedTask(newTask);
+            setShowRecurringModal(true);
+          }
+        }
+        
+        // Generate related task suggestions
+        const relatedTasks = await AIService.recommendRelatedTasks(newTask, tasks);
+        if (relatedTasks.length > 0) {
+          setRelatedTaskSuggestions(relatedTasks);
+          setShowRelatedTasksModal(true);
+        }
       } else if (selectedTask) {
         const updatedTask = TaskService.updateTask(selectedTask.id, taskData);
         if (updatedTask) {
@@ -104,6 +202,15 @@ const Dashboard: React.FC = () => {
       console.error('Error saving task:', error);
       showNotification('Error saving task. Please try again.', 'error');
     }
+  };
+
+  const findSimilarTasks = (task: Task): Task[] => {
+    return tasks.filter(t => 
+      t.id !== task.id &&
+      (t.title.toLowerCase().includes(task.title.toLowerCase()) || 
+       task.title.toLowerCase().includes(t.title.toLowerCase()) ||
+       t.category === task.category)
+    );
   };
 
   const handleUpdateTask = (id: string, updates: Partial<Task>) => {
@@ -149,6 +256,50 @@ const Dashboard: React.FC = () => {
     } finally {
       setIsLoadingSchedule(false);
     }
+  };
+
+  const generateDailySummary = async () => {
+    setIsLoadingSummary(true);
+    try {
+      const summary = await AIService.generateDailySummary(tasks);
+      setDailySummary(summary);
+    } catch (error) {
+      console.error('Error generating daily summary:', error);
+      setDailySummary('Unable to generate daily summary. Please try again later.');
+    } finally {
+      setIsLoadingSummary(false);
+    }
+  };
+
+  const handleAddRelatedTask = (taskData: Partial<Task>) => {
+    try {
+      const newTask = TaskService.addTask({
+        title: taskData.title || '',
+        description: taskData.description || '',
+        priority: taskData.priority as PriorityLevel || 'medium',
+        status: 'pending',
+        category: taskData.category || 'general',
+        estimatedTime: taskData.estimatedTime,
+        aiGenerated: true
+      });
+      
+      setTasks([...tasks, newTask]);
+      showNotification('Related task added!', 'success');
+    } catch (error) {
+      console.error('Error adding related task:', error);
+      showNotification('Error adding task. Please try again.', 'error');
+    }
+  };
+
+  const handleSetupRecurringTask = (recurringPattern: RecurringPattern) => {
+    if (selectedTask) {
+      const updatedTask = TaskService.updateTask(selectedTask.id, { recurring: recurringPattern });
+      if (updatedTask) {
+        setTasks(tasks.map(t => (t.id === updatedTask.id ? updatedTask : t)));
+        showNotification('Recurring task set up successfully!', 'success');
+      }
+    }
+    setShowRecurringModal(false);
   };
 
   const totalTasks = tasks.length;
@@ -200,6 +351,77 @@ const Dashboard: React.FC = () => {
     );
   };
 
+  const handleShowScheduleSuggestion = () => {
+    return (
+      <CustomModal 
+        title={`AI Suggested Schedule (${Intl.DateTimeFormat().resolvedOptions().timeZone})`} 
+        onClose={() => setShowScheduleSuggestion(false)}
+        width={700}
+        footer={
+          <Button onClick={() => setShowScheduleSuggestion(false)}>Close</Button>
+        }
+      >
+        <div style={{ maxHeight: '500px', overflow: 'auto' }}>
+          <h3>Recommended Task Sequence</h3>
+          <ol>
+            {scheduleSuggestion.recommendedSequence.map((taskId: string) => {
+              const task = tasks.find(t => t.id === taskId);
+              return task ? (
+                <li key={task.id}>
+                  <strong>{task.title}</strong> ({task.priority} priority)
+                  {task.dueDate && (
+                    <span> - Due {new Date(task.dueDate).toLocaleDateString(undefined, {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</span>
+                  )}
+                </li>
+              ) : null;
+            })}
+          </ol>
+          
+          <h3>Daily Plan</h3>
+          {Object.keys(scheduleSuggestion.dailyPlan).map(date => {
+            const displayDate = new Date(date);
+            return (
+              <div key={date} style={{ marginBottom: '15px' }}>
+                <h4>{displayDate.toLocaleDateString(undefined, { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</h4>
+                <ul>
+                  {scheduleSuggestion.dailyPlan[date].map((taskId: string) => {
+                    const task = tasks.find(t => t.id === taskId);
+                    return task ? (
+                      <li key={task.id}>
+                        <strong>{task.title}</strong> 
+                        {task.estimatedTime && (
+                          <span> ({task.estimatedTime} mins)</span>
+                        )}
+                      </li>
+                    ) : null;
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+          
+          <h3>Reasoning</h3>
+          <p>{scheduleSuggestion.reasoning}</p>
+          
+          <div className="time-zone-note" style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+            <small><i className="k-icon k-i-info"></i> All times are shown in your local time zone: {Intl.DateTimeFormat().resolvedOptions().timeZone}</small>
+          </div>
+        </div>
+      </CustomModal>
+    );
+  };
+
   return (
     <div className="dashboard">
       {renderNotifications()}
@@ -222,8 +444,22 @@ const Dashboard: React.FC = () => {
           >
             {isLoadingSchedule ? 'Generating...' : 'AI Schedule Suggestions'}
           </Button>
+          <Button
+            onClick={generateDailySummary}
+            disabled={isLoadingSummary}
+            themeColor="success"
+            icon="refresh"
+          >
+            {isLoadingSummary ? 'Generating...' : 'Refresh Daily Summary'}
+          </Button>
         </div>
       </header>
+      
+      {dailySummary && (
+        <div className="daily-summary-section">
+          <DailySummary summary={dailySummary} />
+        </div>
+      )}
       
       <div className="dashboard-stats">
         <div className="stat-item">
@@ -322,60 +558,22 @@ const Dashboard: React.FC = () => {
         />
       )}
       
-      {showScheduleSuggestion && scheduleSuggestion && (
-        <CustomModal 
-          title="AI Suggested Schedule" 
-          onClose={() => setShowScheduleSuggestion(false)}
-          width={700}
-          footer={
-            <Button onClick={() => setShowScheduleSuggestion(false)}>Close</Button>
-          }
-        >
-          <div style={{ maxHeight: '500px', overflow: 'auto' }}>
-            <h3>Recommended Task Sequence</h3>
-            <ol>
-              {scheduleSuggestion.recommendedSequence.map((taskId: string) => {
-                const task = tasks.find(t => t.id === taskId);
-                return task ? (
-                  <li key={task.id}>
-                    <strong>{task.title}</strong> ({task.priority} priority)
-                    {task.dueDate && (
-                      <span> - Due {new Date(task.dueDate).toLocaleDateString()}</span>
-                    )}
-                  </li>
-                ) : null;
-              })}
-            </ol>
-            
-            <h3>Daily Plan</h3>
-            {Object.keys(scheduleSuggestion.dailyPlan).map(date => (
-              <div key={date} style={{ marginBottom: '15px' }}>
-                <h4>{new Date(date).toLocaleDateString(undefined, { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</h4>
-                <ul>
-                  {scheduleSuggestion.dailyPlan[date].map((taskId: string) => {
-                    const task = tasks.find(t => t.id === taskId);
-                    return task ? (
-                      <li key={task.id}>
-                        <strong>{task.title}</strong> 
-                        {task.estimatedTime && (
-                          <span> ({task.estimatedTime} mins)</span>
-                        )}
-                      </li>
-                    ) : null;
-                  })}
-                </ul>
-              </div>
-            ))}
-            
-            <h3>Reasoning</h3>
-            <p>{scheduleSuggestion.reasoning}</p>
-          </div>
-        </CustomModal>
+      {showScheduleSuggestion && scheduleSuggestion && handleShowScheduleSuggestion()}
+      
+      {showRecurringModal && selectedTask && (
+        <RecurringTaskModal
+          task={selectedTask}
+          onSetupRecurring={handleSetupRecurringTask}
+          onCancel={() => setShowRecurringModal(false)}
+        />
+      )}
+      
+      {showRelatedTasksModal && relatedTaskSuggestions.length > 0 && (
+        <RelatedTasksModal
+          suggestions={relatedTaskSuggestions}
+          onAddTask={handleAddRelatedTask}
+          onCancel={() => setShowRelatedTasksModal(false)}
+        />
       )}
     </div>
   );

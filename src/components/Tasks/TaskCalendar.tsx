@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@progress/kendo-react-buttons';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { DatePicker } from '@progress/kendo-react-dateinputs';
+import { Tooltip } from '@progress/kendo-react-tooltip';
 import { Task } from '../../models/Task';
 import { TaskService } from '../../services/TaskService';
 import './TaskCalendar.css';
@@ -25,6 +26,9 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onTaskSelect }) => {
   const [calendarDays, setCalendarDays] = useState<DayWithTasks[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [userTimeZone, setUserTimeZone] = useState<string>(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
   
   const categories = TaskService.getCategories();
   const categoryOptions = [
@@ -68,6 +72,27 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onTaskSelect }) => {
     return includeTask;
   });
 
+  // Function to ensure dates are compared in local time zone
+  const isSameDate = (date1: Date, date2: Date): boolean => {
+    return date1.getDate() === date2.getDate() && 
+           date1.getMonth() === date2.getMonth() && 
+           date1.getFullYear() === date2.getFullYear();
+  };
+
+  // Convert any ISO string to local date
+  const parseToLocalDate = (dateStr: string | Date): Date => {
+    if (typeof dateStr === 'string') {
+      return new Date(dateStr);
+    }
+    return dateStr;
+  };
+
+  // Check if a date is today
+  const isToday = (date: Date): boolean => {
+    const today = new Date();
+    return isSameDate(date, today);
+  };
+
   useEffect(() => {
     const generateCalendarDays = () => {
       const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
@@ -76,10 +101,6 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onTaskSelect }) => {
       const startingDayOfWeek = firstDayOfMonth.getDay();
       
       const today = new Date();
-      const isToday = (date: Date) => 
-        date.getDate() === today.getDate() && 
-        date.getMonth() === today.getMonth() && 
-        date.getFullYear() === today.getFullYear();
       
       const prevMonthDays: DayWithTasks[] = [];
       if (startingDayOfWeek > 0) {
@@ -91,10 +112,9 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onTaskSelect }) => {
           
           const dayTasks = filteredTasks.filter(task => {
             if (!task.dueDate) return false;
-            const dueDate = new Date(task.dueDate);
-            return dueDate.getDate() === date.getDate() && 
-                  dueDate.getMonth() === date.getMonth() && 
-                  dueDate.getFullYear() === date.getFullYear();
+            // Ensure dates are compared properly
+            const dueDate = parseToLocalDate(task.dueDate);
+            return isSameDate(dueDate, date);
           });
           
           prevMonthDays.push({
@@ -195,67 +215,77 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onTaskSelect }) => {
   };
 
   return (
-    <div className="task-calendar">
-      <div className="calendar-header">
-        <div className="month-navigation">
-          <Button onClick={handlePrevMonth} icon="arrow-left" />
-          <div className="month-year-selector">
-            <DropDownList
-              data={months}
-              value={months[currentMonth]}
-              onChange={(e) => setCurrentMonth(months.indexOf(e.value))}
-            />
-            <DropDownList
-              data={generateYearOptions()}
-              value={currentYear}
-              onChange={(e) => setCurrentYear(e.value)}
-            />
+    <div className="task-calendar-container">
+      <div className="calendar-controls">
+        <div className="calendar-header">
+          <div className="month-navigation">
+            <Button onClick={handlePrevMonth} icon="arrow-left" />
+            <div className="month-year-selector">
+              <DropDownList
+                data={months}
+                value={months[currentMonth]}
+                onChange={(e) => setCurrentMonth(months.indexOf(e.value))}
+              />
+              <DropDownList
+                data={generateYearOptions()}
+                value={currentYear}
+                onChange={(e) => setCurrentYear(e.value)}
+              />
+            </div>
+            <Button onClick={handleNextMonth} icon="arrow-right" />
           </div>
-          <Button onClick={handleNextMonth} icon="arrow-right" />
+          
+          <div className="calendar-actions">
+            <Button onClick={handleToday}>Today</Button>
+          </div>
         </div>
         
-        <div className="calendar-actions">
-          <Button onClick={handleToday}>Today</Button>
+        <div className="calendar-filters">
+          <div className="filter-group">
+            <label>Category:</label>
+            <DropDownList
+              data={categoryOptions}
+              textField="text"
+              dataItemKey="value"
+              value={categoryOptions.find(opt => opt.value === categoryFilter)}
+              onChange={(e) => setCategoryFilter(e.value?.value || null)}
+              itemRender={(li, itemProps) => {
+                const item = itemProps.dataItem;
+                if (!item.color) return li;
+                
+                const newProps = {
+                  ...li.props,
+                  style: {
+                    ...li.props.style,
+                    borderLeft: `4px solid ${item.color}`,
+                    paddingLeft: '8px'
+                  }
+                };
+                
+                return React.cloneElement(li, newProps);
+              }}
+            />
+          </div>
+          
+          <div className="filter-group">
+            <label>Priority:</label>
+            <DropDownList
+              data={priorityOptions}
+              textField="text"
+              dataItemKey="value"
+              value={priorityOptions.find(opt => opt.value === priorityFilter)}
+              onChange={(e) => setPriorityFilter(e.value?.value || null)}
+            />
+          </div>
         </div>
       </div>
       
-      <div className="calendar-filters">
-        <div className="filter-group">
-          <label>Category:</label>
-          <DropDownList
-            data={categoryOptions}
-            textField="text"
-            dataItemKey="value"
-            value={categoryOptions.find(opt => opt.value === categoryFilter)}
-            onChange={(e) => setCategoryFilter(e.value?.value || null)}
-            itemRender={(li, itemProps) => {
-              const item = itemProps.dataItem;
-              if (!item.color) return li;
-              
-              const newProps = {
-                ...li.props,
-                style: {
-                  ...li.props.style,
-                  borderLeft: `4px solid ${item.color}`,
-                  paddingLeft: '8px'
-                }
-              };
-              
-              return React.cloneElement(li, newProps);
-            }}
-          />
-        </div>
-        
-        <div className="filter-group">
-          <label>Priority:</label>
-          <DropDownList
-            data={priorityOptions}
-            textField="text"
-            dataItemKey="value"
-            value={priorityOptions.find(opt => opt.value === priorityFilter)}
-            onChange={(e) => setPriorityFilter(e.value?.value || null)}
-          />
-        </div>
+      <div className="calendar-timezone-info">
+        <Tooltip content="Tasks are displayed in your local time zone">
+          <span className="timezone-indicator">
+            <i className="k-icon k-i-clock"></i> {userTimeZone}
+          </span>
+        </Tooltip>
       </div>
       
       <div className="calendar-grid">

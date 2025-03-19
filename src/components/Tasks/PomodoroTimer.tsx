@@ -32,6 +32,10 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ tasks, onTimeLogged }) =>
     longBreakInterval: 4
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [userTimeZone, setUserTimeZone] = useState<string>(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   const activeTasks = tasks.filter(task => 
     task.status !== 'completed' && task.status !== 'postponed'
@@ -74,13 +78,30 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ tasks, onTimeLogged }) =>
     let interval: NodeJS.Timeout | null = null;
 
     if (isRunning && timeLeft > 0) {
+      // When starting a session, record the start time
+      if (!sessionStartTime) {
+        setSessionStartTime(new Date());
+      }
+      
       interval = setInterval(() => {
         setTimeLeft(prevTime => prevTime - 1);
       }, 1000);
     } else if (isRunning && timeLeft === 0) {
       if (currentMode === 'pomodoro') {
         if (currentTask) {
-          onTimeLogged(currentTask, settings.pomodoro);
+          // Calculate exact time spent
+          let minutesSpent = settings.pomodoro;
+          if (sessionStartTime) {
+            const now = new Date();
+            const elapsedMs = now.getTime() - sessionStartTime.getTime();
+            minutesSpent = Math.round(elapsedMs / 60000);
+          }
+          
+          // Log time with additional metadata
+          onTimeLogged(currentTask, minutesSpent);
+          
+          // Reset session start time
+          setSessionStartTime(null);
         }
         
         const newCount = pomodoroCount + 1;
@@ -99,33 +120,36 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ tasks, onTimeLogged }) =>
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, timeLeft, currentMode, currentTask, pomodoroCount, settings, onTimeLogged]);
+  }, [isRunning, timeLeft, currentMode, currentTask, pomodoroCount, settings, onTimeLogged, sessionStartTime]);
 
-  const switchMode = useCallback((mode: 'pomodoro' | 'shortBreak' | 'longBreak') => {
-    setIsRunning(false);
-    setCurrentMode(mode);
-    
+  const switchMode = (mode: 'pomodoro' | 'shortBreak' | 'longBreak') => {
+    let newTime;
     switch (mode) {
       case 'pomodoro':
-        setTimeLeft(settings.pomodoro * 60);
-        if (settings.autoStartPomodoros) {
-          setIsRunning(true);
-        }
+        newTime = settings.pomodoro * 60;
         break;
       case 'shortBreak':
-        setTimeLeft(settings.shortBreak * 60);
-        if (settings.autoStartBreaks) {
-          setIsRunning(true);
-        }
+        newTime = settings.shortBreak * 60;
         break;
       case 'longBreak':
-        setTimeLeft(settings.longBreak * 60);
-        if (settings.autoStartBreaks) {
-          setIsRunning(true);
-        }
+        newTime = settings.longBreak * 60;
         break;
     }
-  }, [settings]);
+    
+    setTimeLeft(newTime);
+    setCurrentMode(mode);
+    
+    // Reset session start time when switching modes
+    setSessionStartTime(null);
+    
+    if ((mode === 'shortBreak' || mode === 'longBreak') && settings.autoStartBreaks) {
+      setIsRunning(true);
+    } else if (mode === 'pomodoro' && settings.autoStartPomodoros) {
+      setIsRunning(true);
+    } else {
+      setIsRunning(false);
+    }
+  };
 
   const toggleTimer = () => {
     setIsRunning(!isRunning);
@@ -242,6 +266,14 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ tasks, onTimeLogged }) =>
             <span>{pomodoroCount}</span>
           </div>
         </div>
+      </div>
+
+      <div className="pomodoro-timezone-info">
+        <Tooltip content="Timer is synchronized with your device time">
+          <span className="timezone-indicator">
+            <i className="k-icon k-i-clock"></i> {userTimeZone}
+          </span>
+        </Tooltip>
       </div>
 
       {showSettings && (

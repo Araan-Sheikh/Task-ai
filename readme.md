@@ -76,8 +76,8 @@ This project demonstrates the power of KendoReact's free components by implement
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/kendo-task-ai-dashboard.git
-   cd kendo-task-ai-dashboard
+   git clone https://github.com/Araan-Sheikh/task-ai.git
+   cd task-ai
    ```
 
 2. Install dependencies:
